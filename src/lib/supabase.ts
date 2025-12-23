@@ -28,6 +28,12 @@ export const getSessionId = (): string => {
   return sessionId;
 };
 
+// Set session ID (for syncing across devices)
+export const setSessionId = (sessionId: string): void => {
+  if (typeof window === "undefined") return;
+  localStorage.setItem("testing_session_id", sessionId);
+};
+
 // Check if Supabase is available
 export const isSupabaseEnabled = (): boolean => {
   return supabase !== null;

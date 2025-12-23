@@ -57,7 +57,12 @@ const getUserId = async (): Promise<string | null> => {
     .single();
 
   if (createError) {
-    console.error("Error creating user:", createError);
+    console.error(
+      "Error creating user:",
+      createError.message,
+      createError.details,
+      createError.hint
+    );
     return null;
   }
 
