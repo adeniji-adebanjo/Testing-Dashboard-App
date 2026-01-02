@@ -97,7 +97,7 @@ export const saveToCloud = async <T>(
       // Update existing
       const { error } = await supabase!
         .from("test_data")
-        .update({ data: data as any })
+        .update({ data: data as unknown })
         .eq("id", existing.id);
 
       if (error) throw error;
@@ -107,7 +107,7 @@ export const saveToCloud = async <T>(
         {
           user_id: userId,
           data_type: key,
-          data: data as any,
+          data: data as unknown,
         },
       ]);
 

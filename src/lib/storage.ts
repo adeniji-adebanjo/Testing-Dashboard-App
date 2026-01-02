@@ -7,6 +7,17 @@ import {
   SignOff,
 } from "@/types/test-case";
 
+export interface StorageData {
+  testCases: TestCase[];
+  defects: Defect[];
+  metrics: SuccessMetric[];
+  objectives: TestObjective[];
+  qualityGates: TestObjective[];
+  environments: TestEnvironment[];
+  signOffs: SignOff[];
+  lastUpdated: string | null;
+}
+
 const STORAGE_KEYS = {
   TEST_CASES: "credit_bureau_test_cases",
   DEFECTS: "credit_bureau_defects",
@@ -128,7 +139,7 @@ export const getLastUpdated = (): string | null => {
 };
 
 // Export all data
-export const exportAllData = () => {
+export const exportAllData = (): StorageData => {
   return {
     testCases: loadTestCases(),
     defects: loadDefects(),
@@ -142,7 +153,7 @@ export const exportAllData = () => {
 };
 
 // Import all data
-export const importAllData = (data: any): void => {
+export const importAllData = (data: Partial<StorageData>): void => {
   if (data.testCases) saveTestCases(data.testCases);
   if (data.defects) saveDefects(data.defects);
   if (data.metrics) saveMetrics(data.metrics);

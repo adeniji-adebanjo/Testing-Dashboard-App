@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,13 +14,14 @@ import { getSessionId, setSessionId } from "@/lib/supabase";
 import { Copy, Save } from "lucide-react";
 
 export default function SessionManager() {
-  const [currentSessionId, setCurrentSessionId] = useState("");
+  const [currentSessionId] = useState(() => {
+    if (typeof window !== "undefined") {
+      return getSessionId();
+    }
+    return "";
+  });
   const [inputSessionId, setInputSessionId] = useState("");
   const [isCopied, setIsCopied] = useState(false);
-
-  useEffect(() => {
-    setCurrentSessionId(getSessionId());
-  }, []);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(currentSessionId);
@@ -49,7 +50,10 @@ export default function SessionManager() {
         <div className="space-y-2">
           <label className="text-sm font-medium">Your Current Session ID</label>
           <div className="flex gap-2">
-            <code className="flex-1 rounded bg-white p-2 text-sm border font-mono">
+            <code
+              className="flex-1 rounded bg-white p-2 text-sm border font-mono"
+              suppressHydrationWarning
+            >
               {currentSessionId}
             </code>
             <Button size="icon" variant="outline" onClick={handleCopy}>
