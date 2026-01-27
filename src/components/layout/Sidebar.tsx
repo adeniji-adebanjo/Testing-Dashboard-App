@@ -88,7 +88,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
               className={cn(
                 "group flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                 isActive
-                  ? "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_15px_rgba(var(--primary),0.1)]"
+                  ? "bg-primary/20 text-white border border-primary/30 shadow-[0_0_15px_rgba(var(--primary),0.1)] scale-[1.02]"
                   : "text-gray-400 hover:bg-gray-800/50 hover:text-white",
               )}
             >
@@ -97,7 +97,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
                   className={cn(
                     "mr-3 h-5 w-5 flex-shrink-0 transition-colors",
                     isActive
-                      ? "text-primary"
+                      ? "text-white"
                       : "text-gray-500 group-hover:text-gray-300",
                   )}
                 />

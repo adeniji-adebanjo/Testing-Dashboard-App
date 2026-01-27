@@ -238,7 +238,7 @@ export default function ProjectPage() {
                 className="block"
               >
                 <Button
-                  className="w-full py-6 rounded-xl font-black text-sm shadow-xl shadow-black/20 hover:scale-[1.02] transition-all"
+                  className="w-full py-6 rounded-xl font-black text-sm shadow-xl cursor-pointer shadow-black/20 hover:scale-[1.02] transition-all"
                   style={{ backgroundColor: currentProject.color }}
                 >
                   START FUNCTIONAL TESTING
@@ -247,7 +247,7 @@ export default function ProjectPage() {
               <Link href={`/projects/${projectId}/reports`} className="block">
                 <Button
                   variant="outline"
-                  className="w-full py-6 rounded-xl font-black text-sm bg-white/5 hover:bg-white/10 transition-all border border-white/10"
+                  className="w-full py-6 rounded-xl font-black text-sm bg-white/5 cursor-pointer  hover:scale-[1] hover:text-black transition-all border border-white/10"
                 >
                   GENERATE AUDIT REPORT
                 </Button>

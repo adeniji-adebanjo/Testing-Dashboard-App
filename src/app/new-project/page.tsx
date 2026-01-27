@@ -243,7 +243,7 @@ export default function NewProjectPage() {
                         }
                         placeholder="e.g. WMA"
                         maxLength={5}
-                        className="h-12 text-lg font-mono uppercase bg-gray-50/50 border-gray-200 focus:bg-white"
+                        className="h-12 text-lg font-mono bg-gray-50/50 border-gray-200 focus:bg-white"
                       />
                     </div>
                     <div className="space-y-2">
