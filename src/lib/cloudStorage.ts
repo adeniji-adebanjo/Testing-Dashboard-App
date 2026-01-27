@@ -1,4 +1,3 @@
-// src/lib/cloudStorage.ts
 import {
   TestCase,
   Defect,
@@ -30,49 +29,62 @@ const STORAGE_KEYS = {
 const getUserId = async (): Promise<string | null> => {
   if (!isSupabaseEnabled()) return null;
 
-  const sessionId = getSessionId();
+  try {
+    const sessionId = getSessionId();
 
-  // Check if user exists
-  const { data: existingUser, error: fetchError } = await supabase!
-    .from("users")
-    .select("id")
-    .eq("session_id", sessionId)
-    .single();
-
-  if (existingUser) {
-    // Update last active
-    await supabase!
+    // Check if user exists
+    const { data: existingUser, error: fetchError } = await supabase!
       .from("users")
-      .update({ last_active: new Date().toISOString() })
-      .eq("id", existingUser.id);
+      .select("id")
+      .eq("session_id", sessionId)
+      .single();
 
-    return existingUser.id;
-  }
+    if (fetchError && fetchError.code !== "PGRST116") {
+      // PGRST116 = no rows returned, which is expected for new users
+      console.warn(
+        "Error fetching user, falling back to localStorage:",
+        fetchError.message,
+      );
+      return null;
+    }
 
-  // Create new user
-  const { data: newUser, error: createError } = await supabase!
-    .from("users")
-    .insert([{ session_id: sessionId }])
-    .select()
-    .single();
+    if (existingUser) {
+      // Update last active
+      await supabase!
+        .from("users")
+        .update({ last_active: new Date().toISOString() })
+        .eq("id", existingUser.id);
 
-  if (createError) {
-    console.error(
-      "Error creating user:",
-      createError.message,
-      createError.details,
-      createError.hint
-    );
+      return existingUser.id;
+    }
+
+    // Create new user
+    const { data: newUser, error: createError } = await supabase!
+      .from("users")
+      .insert([{ session_id: sessionId }])
+      .select()
+      .single();
+
+    if (createError) {
+      console.warn(
+        "Error creating user, falling back to localStorage:",
+        createError.message,
+      );
+      return null;
+    }
+
+    return newUser.id;
+  } catch (error) {
+    // Network error or other unexpected error - fall back to localStorage
+    console.warn("Supabase connection failed, using localStorage:", error);
     return null;
   }
-
-  return newUser.id;
 };
 
 // Save to cloud
 export const saveToCloud = async <T>(
   key: string,
-  data: T
+  data: T,
 ): Promise<boolean> => {
   // Always save to localStorage as backup
   localSave(key, data);
@@ -124,7 +136,7 @@ export const saveToCloud = async <T>(
 // Load from cloud
 export const loadFromCloud = async <T>(
   key: string,
-  defaultValue: T
+  defaultValue: T,
 ): Promise<T> => {
   if (!isSupabaseEnabled()) {
     return localLoad(key, defaultValue);
@@ -183,7 +195,7 @@ export const syncFromCloud = async (): Promise<boolean> => {
 
 // Export specific save functions
 export const saveTestCases = async (
-  testCases: TestCase[]
+  testCases: TestCase[],
 ): Promise<boolean> => {
   return saveToCloud(STORAGE_KEYS.TEST_CASES, testCases);
 };
@@ -201,7 +213,7 @@ export const loadDefects = async (): Promise<Defect[]> => {
 };
 
 export const saveMetrics = async (
-  metrics: SuccessMetric[]
+  metrics: SuccessMetric[],
 ): Promise<boolean> => {
   return saveToCloud(STORAGE_KEYS.METRICS, metrics);
 };
@@ -211,7 +223,7 @@ export const loadMetrics = async (): Promise<SuccessMetric[]> => {
 };
 
 export const saveObjectives = async (
-  objectives: TestObjective[]
+  objectives: TestObjective[],
 ): Promise<boolean> => {
   return saveToCloud(STORAGE_KEYS.OBJECTIVES, objectives);
 };
@@ -221,7 +233,7 @@ export const loadObjectives = async (): Promise<TestObjective[]> => {
 };
 
 export const saveQualityGates = async (
-  gates: TestObjective[]
+  gates: TestObjective[],
 ): Promise<boolean> => {
   return saveToCloud(STORAGE_KEYS.QUALITY_GATES, gates);
 };
@@ -231,7 +243,7 @@ export const loadQualityGates = async (): Promise<TestObjective[]> => {
 };
 
 export const saveEnvironments = async (
-  environments: TestEnvironment[]
+  environments: TestEnvironment[],
 ): Promise<boolean> => {
   return saveToCloud(STORAGE_KEYS.ENVIRONMENTS, environments);
 };

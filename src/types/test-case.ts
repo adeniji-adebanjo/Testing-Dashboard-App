@@ -2,6 +2,7 @@ export type TestStatus = "pass" | "fail" | "pending" | "blocked";
 
 export interface TestCase {
   id: string;
+  projectId?: string; // Optional for backward compatibility
   testCaseId: string;
   module: string;
   scenario: string;
@@ -16,12 +17,15 @@ export interface TestCase {
 
 export interface TestModule {
   id: string;
+  projectId?: string; // Optional for backward compatibility
   name: string;
   description: string;
   testCases: TestCase[];
 }
 
 export interface TestEnvironment {
+  id?: string; // Added for consistency
+  projectId?: string; // Added for multi-project support
   component: string;
   details: string;
   status: "ready" | "pending";
@@ -29,12 +33,14 @@ export interface TestEnvironment {
 
 export interface TestObjective {
   id: string;
+  projectId?: string; // Added for multi-project support
   description: string;
   completed: boolean;
 }
 
 export interface Defect {
   id: string;
+  projectId?: string; // Optional for backward compatibility
   bugId: string;
   severity: "critical" | "high" | "medium" | "low";
   module: string;
@@ -48,6 +54,7 @@ export interface Defect {
 
 export interface SuccessMetric {
   id: string;
+  projectId?: string; // Added for multi-project support
   metric: string;
   target: string;
   actualResult: string;
@@ -55,6 +62,8 @@ export interface SuccessMetric {
 }
 
 export interface SignOff {
+  id?: string; // Added for consistency
+  projectId?: string; // Added for multi-project support
   role: string;
   name: string;
   signature: string;

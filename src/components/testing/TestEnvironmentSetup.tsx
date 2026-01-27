@@ -15,10 +15,10 @@ const initialEnvironments: TestEnvironment[] = [
   },
   {
     component: "Backend Framework",
-    details: "Node.js/Django",
+    details: "PHP/Laravel",
     status: "pending",
   },
-  { component: "Database", details: "PostgreSQL/MongoDB", status: "pending" },
+  { component: "Database", details: "MySQL/PostgreSQL", status: "pending" },
   { component: "Test Environment URL", details: "", status: "pending" },
   { component: "Staging Environment URL", details: "", status: "pending" },
   { component: "API Endpoints Available", details: "", status: "pending" },
@@ -49,8 +49,8 @@ export default function TestEnvironmentSetup() {
       prev.map((env, i) =>
         i === index
           ? { ...env, status: env.status === "ready" ? "pending" : "ready" }
-          : env
-      )
+          : env,
+      ),
     );
   };
 
