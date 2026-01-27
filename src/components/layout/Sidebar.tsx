@@ -13,6 +13,7 @@ import {
   X,
   LayoutGrid,
   ChevronRight,
+  Settings,
 } from "lucide-react";
 import ProjectSwitcher from "@/components/project/ProjectSwitcher";
 import { useProject } from "@/context/ProjectContext";
@@ -43,6 +44,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
       { name: "Defect Tracking", href: `${base}/defects`, icon: Bug },
       { name: "Success Metrics", href: `${base}/metrics`, icon: BarChart3 },
       { name: "Reports & Export", href: `${base}/reports`, icon: FileText },
+      { name: "Settings", href: `${base}/settings`, icon: Settings },
     ];
   };
 

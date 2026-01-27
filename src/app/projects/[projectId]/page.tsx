@@ -71,9 +71,9 @@ export default function ProjectPage() {
             PROJECT OVERVIEW
             <div className="h-px w-8 bg-primary/20" />
           </div>
-          <h1 className="text-4xl font-black tracking-tight text-gray-900 sm:text-5xl">
+          <h2 className="text-4xl font-black tracking-tight text-gray-900 sm:text-5xl">
             {currentProject.name}
-          </h1>
+          </h2>
           <p className="mt-2 text-gray-500 max-w-3xl leading-relaxed text-lg">
             {currentProject.description}
           </p>

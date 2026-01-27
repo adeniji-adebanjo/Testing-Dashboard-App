@@ -1,21 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download, Save, CheckCircle2 } from "lucide-react";
 import { getLastUpdated } from "@/lib/storage";
 import { exportSummaryReport } from "@/lib/export";
 
-export default function Header() {
-  const [lastSaved, setLastSaved] = useState<string>("");
-  const [showSaved, setShowSaved] = useState(false);
+// Helper function to get initial last saved time
+function getInitialLastSaved(): string {
+  if (typeof window === "undefined") return "";
+  const last = getLastUpdated();
+  return last ? new Date(last).toLocaleTimeString() : "";
+}
 
-  useEffect(() => {
-    const last = getLastUpdated();
-    if (last) {
-      setLastSaved(new Date(last).toLocaleTimeString());
-    }
-  }, []);
+export default function Header() {
+  // Use lazy initialization instead of useEffect to avoid cascading renders
+  const [lastSaved, setLastSaved] = useState<string>(getInitialLastSaved);
+  const [showSaved, setShowSaved] = useState(false);
 
   const handleSave = () => {
     const now = new Date().toLocaleTimeString();
@@ -40,14 +41,14 @@ For detailed project-specific reports, navigate to the project's Reports page.
     <header className="hidden lg:flex h-16 items-center justify-between border-b bg-white px-4 sm:px-6">
       <div className="min-w-0 flex-1">
         <h2 className="truncate text-xl font-bold text-gray-900 sm:text-2xl">
-          Credit Bureau Report Management
+          Testing Portal
         </h2>
         <p className="hidden text-sm text-gray-500 sm:block">
-          Testing Objectives & Plan
+          QA Dashboard & Test Management
           {lastSaved && <span className="ml-2">• Last saved: {lastSaved}</span>}
         </p>
       </div>
-      <div className="flex flex-shrink-0 gap-2 sm:gap-3">
+      <div className="flex shrink-0 gap-2 sm:gap-3">
         <Button
           onClick={handleSave}
           variant="outline"

@@ -14,7 +14,11 @@ import {
   getProject,
   getProjectStats,
   initializeProjects,
+  createProject as createProjectStorage,
+  updateProject as updateProjectStorage,
+  deleteProject as deleteProjectStorage,
 } from "@/lib/projectStorage";
+import { CreateProjectInput, UpdateProjectInput } from "@/types/project";
 
 interface ProjectContextType {
   // State
@@ -30,6 +34,12 @@ interface ProjectContextType {
   refreshProjects: () => Promise<void>;
   refreshCurrentProjectStats: () => Promise<void>;
   getProjectWithStats: (projectId: string) => Promise<ProjectWithStats | null>;
+  createProject: (input: CreateProjectInput) => Promise<Project>;
+  updateProject: (
+    projectId: string,
+    input: UpdateProjectInput,
+  ) => Promise<Project>;
+  deleteProject: (projectId: string) => Promise<boolean>;
 }
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
@@ -158,6 +168,49 @@ export function ProjectProvider({
     refreshCurrentProjectStats();
   }, [currentProject, refreshCurrentProjectStats]);
 
+  // Create a new project
+  const createProject = useCallback(
+    async (input: CreateProjectInput): Promise<Project> => {
+      const newProject = await createProjectStorage(input);
+      await loadProjectsInternal();
+      return newProject;
+    },
+    [loadProjectsInternal],
+  );
+
+  // Update an existing project
+  const updateProject = useCallback(
+    async (projectId: string, input: UpdateProjectInput): Promise<Project> => {
+      const updatedProject = await updateProjectStorage(projectId, input);
+      await loadProjectsInternal();
+      // Update current project if it's the one being updated
+      if (currentProject?.id === projectId) {
+        setCurrentProject(updatedProject);
+      }
+      return updatedProject;
+    },
+    [loadProjectsInternal, currentProject],
+  );
+
+  // Delete a project
+  const deleteProject = useCallback(
+    async (projectId: string): Promise<boolean> => {
+      const result = await deleteProjectStorage(projectId);
+      if (result) {
+        await loadProjectsInternal();
+        // Clear current project if it's the one being deleted
+        if (currentProject?.id === projectId) {
+          setCurrentProject(null);
+          if (typeof window !== "undefined") {
+            localStorage.removeItem("current_project_id");
+          }
+        }
+      }
+      return result;
+    },
+    [loadProjectsInternal, currentProject],
+  );
+
   const value: ProjectContextType = {
     projects,
     currentProject,
@@ -169,6 +222,9 @@ export function ProjectProvider({
     refreshProjects,
     refreshCurrentProjectStats,
     getProjectWithStats,
+    createProject,
+    updateProject,
+    deleteProject,
   };
 
   return (
