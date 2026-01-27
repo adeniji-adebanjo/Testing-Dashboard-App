@@ -17,10 +17,12 @@ import {
   FlaskConical,
   Bug,
   Layout,
+  Sparkles,
 } from "lucide-react";
 import ObjectivesCheckList from "@/components/testing/ObjectivesCheckList";
 import TestEnvironmentSetup from "@/components/testing/TestEnvironmentSetup";
 import SignOffSection from "@/components/testing/SignOffSection";
+import { PRDUploader } from "@/components/project/PRDUploader";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -257,6 +259,22 @@ export default function ProjectPage() {
 
           {/* Sign Off */}
           <SignOffSection />
+
+          {/* PRD Analysis */}
+          <Card className="border-none shadow-sm bg-white/60 backdrop-blur-sm overflow-hidden">
+            <CardHeader className="border-b border-gray-100/50 bg-gray-50/30 py-4">
+              <CardTitle className="text-sm font-bold flex items-center gap-2">
+                <Sparkles size={16} className="text-primary" />
+                AI PRD Analysis
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Generate test cases from documents
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-4">
+              <PRDUploader projectId={currentProject.id} />
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
         success: true,
         usedMock: true,
         testCases: generateMockTestCases(projectId),
+        objectives: generateMockObjectives(projectId),
         analysis:
           "Mock analysis: API key not configured. Add GOOGLE_GENERATIVE_AI_API_KEY to your .env.local file for real AI processing.",
       });
@@ -31,27 +32,36 @@ export async function POST(request: NextRequest) {
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    // Construct the prompt
-    const prompt = `You are a QA Test Case Generator. Analyze the following Product Requirements Document (PRD) and extract test cases.
+    // Construct the prompt for test cases AND objectives
+    const prompt = `You are a QA Test Case and Objectives Generator. Analyze the following Product Requirements Document (PRD) and extract:
 
-For each requirement or feature you identify, generate a test case with:
-1. A clear scenario title
-2. The module it belongs to
-3. Step-by-step test steps (numbered)
-4. Expected result
+1. TEST CASES - For each requirement or feature, generate test cases with:
+   - testCaseId: string (format: TC-XXX)
+   - scenario: string (the test case title)
+   - module: string (feature area)
+   - steps: string (numbered steps, one per line)
+   - expectedResult: string
+   - priority: "high" | "medium" | "low"
 
-Return the output as a JSON array with objects containing these fields:
-- testCaseId: string (format: TC-XXX)
-- scenario: string (the test case title)
-- module: string (feature area)
-- steps: string (numbered steps, one per line)
-- expectedResult: string
-- priority: "high" | "medium" | "low"
+2. OBJECTIVES/SUCCESS METRICS - Extract key project objectives with:
+   - id: string (format: OBJ-XXX)
+   - title: string (objective name)
+   - description: string (what this objective aims to achieve)
+   - targetValue: number (target percentage or count)
+   - currentValue: number (start at 0)
+   - unit: string (e.g., "%", "count", "hours")
+   - category: "quality" | "performance" | "coverage" | "efficiency"
+
+Return the output as a JSON object with two arrays:
+{
+  "testCases": [...],
+  "objectives": [...]
+}
 
 PRD Content:
 ${content.substring(0, 15000)}
 
-Return ONLY valid JSON array, no markdown formatting or explanation.`;
+Return ONLY valid JSON, no markdown formatting or explanation.`;
 
     // Call Gemini API
     const result = await model.generateContent(prompt);
@@ -59,14 +69,23 @@ Return ONLY valid JSON array, no markdown formatting or explanation.`;
     const text = response.text();
 
     // Parse the JSON response
-    let testCases;
+    let parsedData: { testCases?: unknown[]; objectives?: unknown[] } = {};
     try {
-      // Try to extract JSON from the response
-      const jsonMatch = text.match(/\[[\s\S]*\]/);
+      // Try to extract JSON object from the response
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
-        testCases = JSON.parse(jsonMatch[0]);
+        parsedData = JSON.parse(jsonMatch[0]);
       } else {
-        throw new Error("No JSON array found in response");
+        // Try to find just the arrays
+        const testCasesMatch = text.match(/\[[\s\S]*?\]/);
+        if (testCasesMatch) {
+          parsedData = {
+            testCases: JSON.parse(testCasesMatch[0]),
+            objectives: [],
+          };
+        } else {
+          throw new Error("No JSON found in response");
+        }
       }
     } catch (parseError) {
       console.error("Failed to parse Gemini response:", parseError);
@@ -76,32 +95,52 @@ Return ONLY valid JSON array, no markdown formatting or explanation.`;
         success: true,
         usedMock: true,
         testCases: generateMockTestCases(projectId),
+        objectives: generateMockObjectives(projectId),
         analysis:
-          "AI analysis completed but response parsing failed. Using sample test cases.",
+          "AI analysis completed but response parsing failed. Using sample data.",
       });
     }
 
     // Format test cases to match our schema
-    const formattedTestCases = testCases.map(
-      (tc: Record<string, string>, index: number) => ({
-        id: `tc-${Date.now()}-${index}`,
-        testCaseId: tc.testCaseId || `TC-${String(index + 1).padStart(3, "0")}`,
-        projectId: projectId,
-        scenario: tc.scenario || tc.title || "Untitled Test Case",
-        module: tc.module || "General",
-        steps: tc.steps || "",
-        expectedResult: tc.expectedResult || "",
-        actualResult: "",
-        status: "pending" as const,
-        comments: `Generated from PRD: ${fileName || "uploaded document"}`,
-      }),
-    );
+    const testCases = (
+      Array.isArray(parsedData.testCases) ? parsedData.testCases : []
+    ) as Record<string, unknown>[];
+    const formattedTestCases = testCases.map((tc, index) => ({
+      id: `tc-${Date.now()}-${index}`,
+      testCaseId:
+        (tc.testCaseId as string) || `TC-${String(index + 1).padStart(3, "0")}`,
+      projectId: projectId,
+      scenario:
+        (tc.scenario as string) || (tc.title as string) || "Untitled Test Case",
+      module: (tc.module as string) || "General",
+      steps: (tc.steps as string) || "",
+      expectedResult: (tc.expectedResult as string) || "",
+      actualResult: "",
+      status: "pending" as const,
+      comments: `Generated from PRD: ${fileName || "uploaded document"}`,
+    }));
+
+    // Format objectives to match our schema
+    const objectives = (
+      Array.isArray(parsedData.objectives) ? parsedData.objectives : []
+    ) as Record<string, unknown>[];
+    const formattedObjectives = objectives.map((obj, index) => ({
+      id: `obj-${Date.now()}-${index}`,
+      projectId: projectId,
+      title: (obj.title as string) || `Objective ${index + 1}`,
+      description: (obj.description as string) || "",
+      targetValue: Number(obj.targetValue) || 100,
+      currentValue: Number(obj.currentValue) || 0,
+      unit: (obj.unit as string) || "%",
+      category: (obj.category as string) || "quality",
+    }));
 
     return NextResponse.json({
       success: true,
       usedMock: false,
       testCases: formattedTestCases,
-      analysis: `AI analysis complete. Extracted ${formattedTestCases.length} test cases from the PRD.`,
+      objectives: formattedObjectives,
+      analysis: `AI analysis complete. Extracted ${formattedTestCases.length} test cases and ${formattedObjectives.length} objectives from the PRD.`,
     });
   } catch (error) {
     console.error("PRD analysis error:", error);
@@ -166,6 +205,53 @@ function generateMockTestCases(projectId: string) {
       actualResult: "",
       status: "pending" as const,
       comments: "Generated from PRD analysis (mock)",
+    },
+  ];
+}
+
+// Mock objectives generator for demo mode
+function generateMockObjectives(projectId: string) {
+  return [
+    {
+      id: `obj-${Date.now()}-1`,
+      projectId: projectId,
+      title: "Test Coverage Target",
+      description:
+        "Achieve comprehensive test coverage across all critical modules",
+      targetValue: 95,
+      currentValue: 0,
+      unit: "%",
+      category: "coverage",
+    },
+    {
+      id: `obj-${Date.now()}-2`,
+      projectId: projectId,
+      title: "Defect Resolution Rate",
+      description: "Resolve critical and high priority defects within SLA",
+      targetValue: 90,
+      currentValue: 0,
+      unit: "%",
+      category: "quality",
+    },
+    {
+      id: `obj-${Date.now()}-3`,
+      projectId: projectId,
+      title: "Regression Test Pass Rate",
+      description: "Maintain high pass rate for regression test suites",
+      targetValue: 98,
+      currentValue: 0,
+      unit: "%",
+      category: "quality",
+    },
+    {
+      id: `obj-${Date.now()}-4`,
+      projectId: projectId,
+      title: "Test Execution Efficiency",
+      description: "Complete test cycles within planned timeframes",
+      targetValue: 100,
+      currentValue: 0,
+      unit: "%",
+      category: "efficiency",
     },
   ];
 }

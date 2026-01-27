@@ -37,6 +37,7 @@ import {
   exportSummaryReport,
   printReport,
 } from "@/lib/export";
+import { ShareableLink } from "@/components/project/ShareableLink";
 
 export default function ProjectReportsPage() {
   const { projectId } = useParams();
@@ -207,11 +208,18 @@ Success Metrics: ${mt.length} defined
             <CardContent>
               <p className="text-xs text-gray-600 leading-relaxed">
                 These reports are generated in real-time and comply with
-                standard QA auditing requirements. Ensure all "Fail" results
-                have corresponding defects logged before final submission.
+                standard QA auditing requirements. Ensure all &quot;Fail&quot;
+                results have corresponding defects logged before final
+                submission.
               </p>
             </CardContent>
           </Card>
+
+          {/* Shareable Link */}
+          <ShareableLink
+            projectId={id}
+            projectName={currentProject?.name || "Project"}
+          />
         </div>
 
         {/* Live Preview */}

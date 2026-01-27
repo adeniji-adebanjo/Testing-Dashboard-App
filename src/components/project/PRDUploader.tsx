@@ -3,7 +3,6 @@
 import { useState } from "react";
 import {
   Upload,
-  FileText,
   Loader2,
   CheckCircle2,
   AlertCircle,
@@ -11,29 +10,52 @@ import {
   ChevronRight,
   FileCode,
   Check,
+  Target,
+  ClipboardList,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { TestCase } from "@/types/test-case";
-import { useUpdateTestCases } from "@/hooks/useTestData";
+import { TestCase, TestObjective } from "@/types/test-case";
+import { useUpdateTestCases, useUpdateObjectives } from "@/hooks/useTestData";
 
 interface PRDUploaderProps {
   projectId: string;
+  onComplete?: () => void;
+}
+
+// Type for AI-generated objectives (different from TestObjective which only has id, description, completed)
+interface GeneratedObjective {
+  id?: string;
+  projectId?: string;
+  title?: string;
+  description?: string;
+  targetValue?: number;
+  currentValue?: number;
+  unit?: string;
+  category?: string;
 }
 
 interface ParsedResult {
   testCases: Partial<TestCase>[];
+  objectives: GeneratedObjective[];
   analysis: string;
 }
 
-export function PRDUploader({ projectId }: PRDUploaderProps) {
-  const [isUploading, setIsUploading] = useState(false);
+export function PRDUploader({ projectId, onComplete }: PRDUploaderProps) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<ParsedResult | null>(null);
-  const { mutate: updateTestCases, isPending: isSaving } =
+  const [importTestCases, setImportTestCases] = useState(true);
+  const [importObjectives, setImportObjectives] = useState(true);
+
+  const { mutate: updateTestCases, isPending: isSavingTests } =
     useUpdateTestCases(projectId);
+  const { mutate: updateObjectives, isPending: isSavingObjectives } =
+    useUpdateObjectives(projectId);
+
+  const isSaving = isSavingTests || isSavingObjectives;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -74,14 +96,15 @@ export function PRDUploader({ projectId }: PRDUploaderProps) {
       }
 
       setResult({
-        testCases: data.testCases,
+        testCases: data.testCases || [],
+        objectives: data.objectives || [],
         analysis: data.analysis + (data.usedMock ? " (Demo Mode)" : ""),
       });
     } catch (error) {
       console.error("PRD analysis failed:", error);
-      // Fallback to showing an error message
       setResult({
         testCases: [],
+        objectives: [],
         analysis: `Analysis failed: ${error instanceof Error ? error.message : "Unknown error"}. Please try again.`,
       });
     } finally {
@@ -99,26 +122,54 @@ export function PRDUploader({ projectId }: PRDUploaderProps) {
         if (typeof content === "string") {
           resolve(content);
         } else {
-          // For PDF files, we'd need a proper PDF parser
-          // For now, just read as text
           resolve(content?.toString() || "");
         }
       };
 
       reader.onerror = () => reject(new Error("Failed to read file"));
-
-      // Read as text - works for .txt, .md files
-      // For PDF/DOCX, you'd need additional libraries
       reader.readAsText(file);
     });
   };
 
-  const handleImport = () => {
+  const handleImport = async () => {
     if (!result) return;
 
-    // In a real app, we'd merge with existing test cases
-    // For now, we'll just prepend them or replace
-    updateTestCases(result.testCases as TestCase[]);
+    try {
+      if (importTestCases && result.testCases.length > 0) {
+        updateTestCases(result.testCases as TestCase[]);
+      }
+
+      if (importObjectives && result.objectives.length > 0) {
+        // Convert GeneratedObjective to TestObjective format
+        const testObjectives: TestObjective[] = result.objectives.map(
+          (obj) => ({
+            id:
+              obj.id ||
+              `obj-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            projectId: projectId,
+            description: obj.title
+              ? `${obj.title}: ${obj.description || ""} (Target: ${obj.targetValue || 100}${obj.unit || "%"})`
+              : obj.description || "",
+            completed: false,
+          }),
+        );
+        updateObjectives(testObjectives);
+      }
+
+      // Reset state after import
+      setTimeout(() => {
+        setResult(null);
+        setFile(null);
+        onComplete?.();
+      }, 500);
+    } catch (error) {
+      console.error("Import failed:", error);
+    }
+  };
+
+  const handleReset = () => {
+    setResult(null);
+    setFile(null);
   };
 
   return (
@@ -152,8 +203,8 @@ export function PRDUploader({ projectId }: PRDUploaderProps) {
             </h3>
             <p className="text-sm text-gray-500 max-w-xs mx-auto mt-1">
               {isAnalyzing
-                ? "Our AI is extracting requirements and generating test scenarios..."
-                : "Drop your PDF, DOCX or Markdown PRD to auto-generate test cases."}
+                ? "Extracting test cases and objectives..."
+                : "Drop your TXT or Markdown PRD to auto-generate test cases and objectives."}
             </p>
           </div>
 
@@ -165,7 +216,7 @@ export function PRDUploader({ projectId }: PRDUploaderProps) {
                     type="file"
                     id="prd-upload"
                     className="hidden"
-                    accept=".pdf,.docx,.md,.txt"
+                    accept=".md,.txt"
                     onChange={handleFileChange}
                   />
                   <Button
@@ -173,7 +224,7 @@ export function PRDUploader({ projectId }: PRDUploaderProps) {
                     onClick={() =>
                       document.getElementById("prd-upload")?.click()
                     }
-                    className="w-full rounded-xl"
+                    className="w-full rounded-xl cursor-pointer"
                   >
                     Select File
                   </Button>
@@ -184,7 +235,7 @@ export function PRDUploader({ projectId }: PRDUploaderProps) {
                     variant="ghost"
                     onClick={() => setFile(null)}
                     disabled={isAnalyzing}
-                    className="flex-1 rounded-xl"
+                    className="flex-1 rounded-xl cursor-pointer"
                   >
                     Cancel
                   </Button>
@@ -202,6 +253,7 @@ export function PRDUploader({ projectId }: PRDUploaderProps) {
         </div>
       ) : (
         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {/* Analysis Complete Card */}
           <Card className="border-none shadow-sm bg-green-50/50 overflow-hidden">
             <CardContent className="p-4 flex items-start gap-3">
               <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 shrink-0">
@@ -216,53 +268,129 @@ export function PRDUploader({ projectId }: PRDUploaderProps) {
             </CardContent>
           </Card>
 
-          <div className="space-y-3">
-            <p className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">
-              Generated Test Cases ({result.testCases.length})
-            </p>
-            {result.testCases.map((tc, idx) => (
-              <div
-                key={idx}
-                className="p-4 rounded-xl border border-gray-100 bg-white shadow-sm hover:border-primary/30 transition-colors group"
-              >
-                <div className="flex justify-between items-start gap-4">
-                  <div className="space-y-1">
-                    <h5 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                      <span className="text-primary">{tc.testCaseId}:</span>{" "}
-                      {tc.scenario}
-                    </h5>
-                    <p className="text-[10px] text-gray-500 line-clamp-2 italic">
-                      {tc.module} • {tc.steps?.split("\n").length} steps
-                    </p>
-                  </div>
-                  <ChevronRight
-                    size={16}
-                    className="text-gray-300 group-hover:text-primary transition-colors shrink-0 mt-1"
-                  />
+          {/* Test Cases Section */}
+          {result.testCases.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ClipboardList size={14} className="text-blue-600" />
+                  <p className="text-xs font-bold text-gray-700">
+                    Test Cases ({result.testCases.length})
+                  </p>
                 </div>
+                <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={importTestCases}
+                    onChange={(e) => setImportTestCases(e.target.checked)}
+                    className="rounded"
+                  />
+                  Import
+                </label>
               </div>
-            ))}
-          </div>
+              <div className="max-h-48 overflow-y-auto space-y-2">
+                {result.testCases.slice(0, 5).map((tc, idx) => (
+                  <div
+                    key={idx}
+                    className="p-3 rounded-lg border border-gray-100 bg-white shadow-sm"
+                  >
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="space-y-1 min-w-0">
+                        <h5 className="text-sm font-bold text-gray-900 flex items-center gap-2 truncate">
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] shrink-0"
+                          >
+                            {tc.testCaseId}
+                          </Badge>
+                          <span className="truncate">{tc.scenario}</span>
+                        </h5>
+                        <p className="text-[10px] text-gray-500 italic">
+                          {tc.module} • {tc.steps?.split("\n").length} steps
+                        </p>
+                      </div>
+                      <ChevronRight
+                        size={14}
+                        className="text-gray-300 shrink-0"
+                      />
+                    </div>
+                  </div>
+                ))}
+                {result.testCases.length > 5 && (
+                  <p className="text-xs text-gray-400 text-center py-2">
+                    +{result.testCases.length - 5} more test cases
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
 
-          <div className="flex gap-3">
+          {/* Objectives Section */}
+          {result.objectives.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Target size={14} className="text-purple-600" />
+                  <p className="text-xs font-bold text-gray-700">
+                    Objectives ({result.objectives.length})
+                  </p>
+                </div>
+                <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={importObjectives}
+                    onChange={(e) => setImportObjectives(e.target.checked)}
+                    className="rounded"
+                  />
+                  Import
+                </label>
+              </div>
+              <div className="max-h-48 overflow-y-auto space-y-2">
+                {result.objectives.map((obj, idx) => (
+                  <div
+                    key={idx}
+                    className="p-3 rounded-lg border border-gray-100 bg-white shadow-sm"
+                  >
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="space-y-1 min-w-0">
+                        <h5 className="text-sm font-bold text-gray-900 truncate">
+                          {obj.title}
+                        </h5>
+                        <p className="text-[10px] text-gray-500 italic line-clamp-1">
+                          {obj.description}
+                        </p>
+                      </div>
+                      <Badge variant="outline" className="text-[10px] shrink-0">
+                        {obj.targetValue}
+                        {obj.unit}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex gap-3 pt-2">
             <Button
               variant="outline"
-              onClick={() => setResult(null)}
-              className="flex-1 rounded-xl"
+              onClick={handleReset}
+              className="flex-1 rounded-xl cursor-pointer"
             >
               Back
             </Button>
             <Button
               onClick={handleImport}
-              disabled={isSaving}
-              className="flex-1 rounded-xl bg-primary shadow-lg shadow-primary/20 gap-2"
+              disabled={isSaving || (!importTestCases && !importObjectives)}
+              className="flex-1 rounded-xl bg-primary shadow-lg shadow-primary/20 gap-2 cursor-pointer"
             >
               {isSaving ? (
                 <Loader2 size={16} className="animate-spin" />
               ) : (
                 <Check size={16} />
               )}
-              Import Test Cases
+              Import Selected
             </Button>
           </div>
         </div>
@@ -271,12 +399,10 @@ export function PRDUploader({ projectId }: PRDUploaderProps) {
       <div className="p-4 rounded-xl bg-amber-50 border border-amber-100 flex gap-3">
         <AlertCircle size={18} className="text-amber-600 shrink-0" />
         <div className="space-y-1">
-          <p className="text-xs font-bold text-amber-900">
-            Experimental Feature
-          </p>
+          <p className="text-xs font-bold text-amber-900">AI-Powered Feature</p>
           <p className="text-[10px] text-amber-700 leading-relaxed">
-            AI parsing accuracy depends on document quality. Always review
-            generated test cases before marked as standard.
+            Accuracy depends on document quality. Review generated items before
+            finalizing. Supports .txt and .md files.
           </p>
         </div>
       </div>

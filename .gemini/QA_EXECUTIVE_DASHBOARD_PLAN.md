@@ -118,11 +118,11 @@ This plan outlines the implementation of advanced features tailored for a **sing
 2. ✅ Connect PRDUploader to real API
 3. ⬜ Implement Supabase Storage for PRDs (future enhancement)
 
-### Sprint A4: Public Access
+### Sprint A4: Public Access ✅ COMPLETED
 
-1. ⬜ Create public report routes
-2. ⬜ Implement view-only mode
-3. ⬜ Generate shareable links
+1. ✅ Create public report routes - `src/app/public/projects/[projectId]/page.tsx`
+2. ✅ Implement view-only mode - No sidebar, read-only stats display
+3. ✅ Generate shareable links - `src/components/project/ShareableLink.tsx`
 
 ---
 
