@@ -105,6 +105,32 @@ export const saveToCloud = async <T>(
     const userId = await getUserId();
     if (!userId) return false;
 
+    // Prepare payload
+    interface TestDataPayload {
+      user_id: string;
+      data_type: string;
+      data: unknown;
+      updated_at: string;
+      project_id?: string;
+    }
+
+    const payload: TestDataPayload = {
+      user_id: userId,
+      data_type: storageKey,
+      data: data as unknown,
+      updated_at: new Date().toISOString(),
+    };
+
+    // If we have a projectId and it looks like a valid UUID, link it
+    if (
+      projectId &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        projectId,
+      )
+    ) {
+      payload.project_id = projectId;
+    }
+
     // Check if record exists
     const { data: existing } = await supabase!
       .from("test_data")
@@ -117,19 +143,13 @@ export const saveToCloud = async <T>(
       // Update existing
       const { error } = await supabase!
         .from("test_data")
-        .update({ data: data as unknown })
+        .update(payload)
         .eq("id", existing.id);
 
       if (error) throw error;
     } else {
       // Insert new
-      const { error } = await supabase!.from("test_data").insert([
-        {
-          user_id: userId,
-          data_type: storageKey,
-          data: data as unknown,
-        },
-      ]);
+      const { error } = await supabase!.from("test_data").insert([payload]);
 
       if (error) throw error;
     }
