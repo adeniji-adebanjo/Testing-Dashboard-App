@@ -41,75 +41,76 @@ export function PRDUploader({ projectId }: PRDUploaderProps) {
     }
   };
 
-  const simulateAnalysis = async () => {
+  const analyzeWithAI = async () => {
     if (!file) return;
 
     setIsAnalyzing(true);
 
-    // Simulate AI analysis delay
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    try {
+      // Read file content
+      const content = await readFileContent(file);
 
-    const mockTestCases: TestCase[] = [
-      {
-        id: `tc-${Math.random().toString(36).substr(2, 9)}`,
-        testCaseId: "TC-001",
-        projectId: projectId,
-        scenario: "User Authentication - Biometric Login",
-        module: "Security",
-        steps: [
-          "1. Enable biometrics in settings",
-          "2. Lock the device",
-          "3. Attempt to open app",
-          "4. Trigger biometric prompt",
-        ].join("\n"),
-        expectedResult: "App unlocks successfully after biometric verification",
-        actualResult: "",
-        status: "pending",
-        comments: "Generated from PRD analysis",
-      },
-      {
-        id: `tc-${Math.random().toString(36).substr(2, 9)}`,
-        testCaseId: "TC-002",
-        projectId: projectId,
-        scenario: "Real-time Credit Score Update",
-        module: "Core Dashboard",
-        steps: [
-          "1. Open dashboard",
-          "2. Trigger mock bureau webhook",
-          "3. Observe score widget",
-        ].join("\n"),
-        expectedResult:
-          "Score widget animates and shows new value within 2 seconds",
-        actualResult: "",
-        status: "pending",
-        comments: "Generated from PRD analysis",
-      },
-      {
-        id: `tc-${Math.random().toString(36).substr(2, 9)}`,
-        testCaseId: "TC-003",
-        projectId: projectId,
-        scenario: "Offline Transaction Sync",
-        module: "Transactions",
-        steps: [
-          "1. Enter offline mode",
-          "2. Perform a transaction",
-          "3. Restore connectivity",
-          "4. Check transaction history",
-        ].join("\n"),
-        expectedResult: "Transaction appears in history with 'synced' status",
-        actualResult: "",
-        status: "pending",
-        comments: "Generated from PRD analysis",
-      },
-    ];
+      // Call the AI analysis API
+      const response = await fetch("/api/analyze-prd", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content,
+          projectId,
+          fileName: file.name,
+        }),
+      });
 
-    setResult({
-      testCases: mockTestCases,
-      analysis:
-        "PRD analyzed successfully. Identified 12 potential test scenarios. Filtered 3 high-confidence functional test cases ready for import.",
+      if (!response.ok) {
+        throw new Error("Failed to analyze PRD");
+      }
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      setResult({
+        testCases: data.testCases,
+        analysis: data.analysis + (data.usedMock ? " (Demo Mode)" : ""),
+      });
+    } catch (error) {
+      console.error("PRD analysis failed:", error);
+      // Fallback to showing an error message
+      setResult({
+        testCases: [],
+        analysis: `Analysis failed: ${error instanceof Error ? error.message : "Unknown error"}. Please try again.`,
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  // Helper to read file content as text
+  const readFileContent = async (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        const content = e.target?.result;
+        if (typeof content === "string") {
+          resolve(content);
+        } else {
+          // For PDF files, we'd need a proper PDF parser
+          // For now, just read as text
+          resolve(content?.toString() || "");
+        }
+      };
+
+      reader.onerror = () => reject(new Error("Failed to read file"));
+
+      // Read as text - works for .txt, .md files
+      // For PDF/DOCX, you'd need additional libraries
+      reader.readAsText(file);
     });
-
-    setIsAnalyzing(false);
   };
 
   const handleImport = () => {
@@ -188,11 +189,11 @@ export function PRDUploader({ projectId }: PRDUploaderProps) {
                     Cancel
                   </Button>
                   <Button
-                    onClick={simulateAnalysis}
-                    className="flex-1 rounded-xl bg-primary shadow-lg shadow-primary/20 gap-2"
+                    onClick={analyzeWithAI}
+                    className="flex-1 rounded-xl bg-primary shadow-lg shadow-primary/20 gap-2 cursor-pointer"
                   >
                     <Sparkles size={16} />
-                    Analyze
+                    Analyze with AI
                   </Button>
                 </div>
               )}

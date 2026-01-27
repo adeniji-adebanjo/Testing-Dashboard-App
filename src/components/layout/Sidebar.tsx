@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useParams } from "next/navigation";
+import { usePathname, useParams, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   Home,
@@ -14,18 +14,33 @@ import {
   LayoutGrid,
   ChevronRight,
   Settings,
+  Shield,
+  LogOut,
+  LogIn,
 } from "lucide-react";
 import ProjectSwitcher from "@/components/project/ProjectSwitcher";
 import { useProject } from "@/context/ProjectContext";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Sidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
   const { projectId } = useParams();
   const { currentProject } = useProject();
+  const { user, isAuthenticated, signOut } = useAuth();
+  const router = useRouter();
 
   const getNavItems = () => {
     if (!projectId) {
-      return [{ name: "Project Hub", href: "/", icon: LayoutGrid }];
+      const items = [{ name: "Project Hub", href: "/", icon: LayoutGrid }];
+      // Add Executive Dashboard for authenticated users
+      if (isAuthenticated) {
+        items.push({
+          name: "Executive Dashboard",
+          href: "/executive",
+          icon: Shield,
+        });
+      }
+      return items;
     }
 
     const base = `/projects/${projectId}`;
@@ -49,6 +64,11 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
   };
 
   const navigation = getNavItems();
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/");
+  };
 
   return (
     <div className="flex h-screen w-64 flex-col bg-gray-900 text-white shadow-2xl">
@@ -112,17 +132,39 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
       </nav>
 
       <div className="border-t border-gray-800 p-6 bg-gray-900/50">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-linear-to-br from-primary to-blue-600 flex items-center justify-center text-[10px] font-bold">
-            AA
-          </div>
-          <div className="flex flex-col min-w-0">
-            <span className="text-xs font-bold truncate">Adebanjo Adeniji</span>
-            <span className="text-[10px] text-gray-500 truncate">
-              Senior QA Engineer
-            </span>
-          </div>
-        </div>
+        {isAuthenticated ? (
+          <>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-linear-to-br from-primary to-blue-600 flex items-center justify-center text-[10px] font-bold">
+                {user?.email?.slice(0, 2).toUpperCase() || "QA"}
+              </div>
+              <div className="flex flex-col min-w-0 flex-1">
+                <span className="text-xs font-bold truncate">
+                  {user?.email || "QA Executive"}
+                </span>
+                <span className="text-[10px] text-gray-500 truncate flex items-center gap-1">
+                  <Shield size={10} className="text-primary" />
+                  Executive Access
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={handleSignOut}
+              className="mt-4 w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs text-gray-400 hover:text-white hover:bg-gray-800 transition-colors cursor-pointer"
+            >
+              <LogOut size={14} />
+              Sign Out
+            </button>
+          </>
+        ) : (
+          <Link
+            href="/login"
+            className="flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium bg-primary/20 text-white hover:bg-primary/30 transition-colors cursor-pointer"
+          >
+            <LogIn size={16} />
+            Executive Login
+          </Link>
+        )}
         <div className="mt-4 pt-4 border-t border-gray-800 flex justify-between items-center text-[10px] text-gray-500">
           <span>v2.0.0</span>
           <div className="flex items-center gap-1 text-green-500">
