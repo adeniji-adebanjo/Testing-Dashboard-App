@@ -126,7 +126,7 @@ export default function PublicProjectsIndexPage() {
         {/* Footer */}
         <div className="text-center pt-12 border-t border-gray-200 mt-12">
           <p className="text-sm text-gray-400">
-            Powered by TestPortal • {new Date().getFullYear()}
+            Powered by Adebanjo Adeniji • {new Date().getFullYear()}
           </p>
           <Link
             href="/dashboard"

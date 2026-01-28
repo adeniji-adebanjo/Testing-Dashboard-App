@@ -99,182 +99,154 @@ export default function PublicProjectSummaryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
-      {/* Public Header */}
-      <header className="bg-white border-b border-gray-100 shadow-sm">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm"
-              style={{ backgroundColor: project.color || "#6366F1" }}
-            >
-              {project.shortCode?.slice(0, 2)}
+    <div className="max-w-5xl mx-auto px-6 py-10 space-y-8">
+      {/* Project Info */}
+      <div className="text-center max-w-2xl mx-auto">
+        <Badge
+          variant="outline"
+          className="mb-4 text-xs uppercase tracking-wider"
+        >
+          {project.phase}
+        </Badge>
+        <h2 className="text-3xl font-black text-gray-900 tracking-tight">
+          {project.name}
+        </h2>
+        {project.description && (
+          <p className="text-gray-500 mt-3 leading-relaxed">
+            {project.description}
+          </p>
+        )}
+      </div>
+
+      {/* Primary Stats */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <StatCard
+          label="Pass Rate"
+          value={`${stats.passRate}%`}
+          icon={<Target className="w-5 h-5" />}
+          color={
+            stats.passRate >= 80
+              ? "green"
+              : stats.passRate >= 60
+                ? "amber"
+                : "red"
+          }
+        />
+        <StatCard
+          label="Total Tests"
+          value={stats.totalTestCases.toString()}
+          icon={<CheckCircle2 className="w-5 h-5" />}
+          color="blue"
+        />
+        <StatCard
+          label="Open Defects"
+          value={stats.defectsOpen.toString()}
+          icon={<Bug className="w-5 h-5" />}
+          color={stats.defectsOpen === 0 ? "green" : "red"}
+        />
+        <StatCard
+          label="Resolved"
+          value={stats.defectsClosed.toString()}
+          icon={<CheckCircle2 className="w-5 h-5" />}
+          color="green"
+        />
+      </div>
+
+      {/* Test Execution Breakdown */}
+      <Card className="border-none shadow-lg overflow-hidden">
+        <CardHeader className="bg-gray-50 border-b border-gray-100">
+          <CardTitle className="text-lg">Test Execution Status</CardTitle>
+          <CardDescription>
+            Current testing progress for this project
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <StatusBlock
+              label="Passed"
+              value={stats.passed}
+              total={stats.totalTestCases}
+              color="bg-green-500"
+              icon={<CheckCircle2 className="w-4 h-4" />}
+            />
+            <StatusBlock
+              label="Failed"
+              value={stats.failed}
+              total={stats.totalTestCases}
+              color="bg-red-500"
+              icon={<XCircle className="w-4 h-4" />}
+            />
+            <StatusBlock
+              label="Pending"
+              value={stats.pending}
+              total={stats.totalTestCases}
+              color="bg-amber-500"
+              icon={<Clock className="w-4 h-4" />}
+            />
+            <StatusBlock
+              label="Blocked"
+              value={stats.blocked}
+              total={stats.totalTestCases}
+              color="bg-gray-500"
+              icon={<AlertTriangle className="w-4 h-4" />}
+            />
+          </div>
+
+          {/* Progress Bar */}
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs text-gray-500">
+              <span>Overall Progress</span>
+              <span>
+                {stats.passed + stats.failed} of {stats.totalTestCases} executed
+              </span>
             </div>
-            <div>
-              <h1 className="font-bold text-gray-900">{project.name}</h1>
-              <p className="text-xs text-gray-500">Quality Assurance Summary</p>
+            <div className="flex h-4 rounded-full overflow-hidden bg-gray-100">
+              {stats.totalTestCases > 0 && (
+                <>
+                  <div
+                    className="bg-green-500 transition-all"
+                    style={{
+                      width: `${(stats.passed / stats.totalTestCases) * 100}%`,
+                    }}
+                  />
+                  <div
+                    className="bg-red-500 transition-all"
+                    style={{
+                      width: `${(stats.failed / stats.totalTestCases) * 100}%`,
+                    }}
+                  />
+                  <div
+                    className="bg-amber-500 transition-all"
+                    style={{
+                      width: `${(stats.pending / stats.totalTestCases) * 100}%`,
+                    }}
+                  />
+                  <div
+                    className="bg-gray-400 transition-all"
+                    style={{
+                      width: `${(stats.blocked / stats.totalTestCases) * 100}%`,
+                    }}
+                  />
+                </>
+              )}
             </div>
           </div>
-          <Badge
-            variant="outline"
-            className="text-xs gap-1 bg-green-50 text-green-700 border-green-200"
-          >
-            <Shield size={12} />
-            Public Report
-          </Badge>
-        </div>
-      </header>
+        </CardContent>
+      </Card>
 
-      <main className="max-w-5xl mx-auto px-6 py-10 space-y-8">
-        {/* Project Info */}
-        <div className="text-center max-w-2xl mx-auto">
-          <Badge
-            variant="outline"
-            className="mb-4 text-xs uppercase tracking-wider"
-          >
-            {project.phase}
-          </Badge>
-          <h2 className="text-3xl font-black text-gray-900 tracking-tight">
-            {project.name}
-          </h2>
-          {project.description && (
-            <p className="text-gray-500 mt-3 leading-relaxed">
-              {project.description}
-            </p>
-          )}
-        </div>
-
-        {/* Primary Stats */}
-        <div className="grid gap-4 md:grid-cols-4">
-          <StatCard
-            label="Pass Rate"
-            value={`${stats.passRate}%`}
-            icon={<Target className="w-5 h-5" />}
-            color={
-              stats.passRate >= 80
-                ? "green"
-                : stats.passRate >= 60
-                  ? "amber"
-                  : "red"
-            }
-          />
-          <StatCard
-            label="Total Tests"
-            value={stats.totalTestCases.toString()}
-            icon={<CheckCircle2 className="w-5 h-5" />}
-            color="blue"
-          />
-          <StatCard
-            label="Open Defects"
-            value={stats.defectsOpen.toString()}
-            icon={<Bug className="w-5 h-5" />}
-            color={stats.defectsOpen === 0 ? "green" : "red"}
-          />
-          <StatCard
-            label="Resolved"
-            value={stats.defectsClosed.toString()}
-            icon={<CheckCircle2 className="w-5 h-5" />}
-            color="green"
-          />
-        </div>
-
-        {/* Test Execution Breakdown */}
-        <Card className="border-none shadow-lg overflow-hidden">
-          <CardHeader className="bg-gray-50 border-b border-gray-100">
-            <CardTitle className="text-lg">Test Execution Status</CardTitle>
-            <CardDescription>
-              Current testing progress for this project
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <StatusBlock
-                label="Passed"
-                value={stats.passed}
-                total={stats.totalTestCases}
-                color="bg-green-500"
-                icon={<CheckCircle2 className="w-4 h-4" />}
-              />
-              <StatusBlock
-                label="Failed"
-                value={stats.failed}
-                total={stats.totalTestCases}
-                color="bg-red-500"
-                icon={<XCircle className="w-4 h-4" />}
-              />
-              <StatusBlock
-                label="Pending"
-                value={stats.pending}
-                total={stats.totalTestCases}
-                color="bg-amber-500"
-                icon={<Clock className="w-4 h-4" />}
-              />
-              <StatusBlock
-                label="Blocked"
-                value={stats.blocked}
-                total={stats.totalTestCases}
-                color="bg-gray-500"
-                icon={<AlertTriangle className="w-4 h-4" />}
-              />
-            </div>
-
-            {/* Progress Bar */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs text-gray-500">
-                <span>Overall Progress</span>
-                <span>
-                  {stats.passed + stats.failed} of {stats.totalTestCases}{" "}
-                  executed
-                </span>
-              </div>
-              <div className="flex h-4 rounded-full overflow-hidden bg-gray-100">
-                {stats.totalTestCases > 0 && (
-                  <>
-                    <div
-                      className="bg-green-500 transition-all"
-                      style={{
-                        width: `${(stats.passed / stats.totalTestCases) * 100}%`,
-                      }}
-                    />
-                    <div
-                      className="bg-red-500 transition-all"
-                      style={{
-                        width: `${(stats.failed / stats.totalTestCases) * 100}%`,
-                      }}
-                    />
-                    <div
-                      className="bg-amber-500 transition-all"
-                      style={{
-                        width: `${(stats.pending / stats.totalTestCases) * 100}%`,
-                      }}
-                    />
-                    <div
-                      className="bg-gray-400 transition-all"
-                      style={{
-                        width: `${(stats.blocked / stats.totalTestCases) * 100}%`,
-                      }}
-                    />
-                  </>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Footer */}
-        <div className="text-center pt-8 border-t border-gray-200">
-          <p className="text-sm text-gray-400 mb-2">
-            Generated by Adebanjo Adeniji • {new Date().toLocaleDateString()}
-          </p>
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-          >
-            <ExternalLink size={12} />
-            Access Full Dashboard
-          </Link>
-        </div>
-      </main>
+      {/* Footer */}
+      <div className="text-center pt-8 border-t border-gray-200">
+        <p className="text-sm text-gray-400 mb-2">
+          Generated by TestPortal • {new Date().toLocaleDateString()}
+        </p>
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+        >
+          <ExternalLink size={12} />
+          Access Full Dashboard
+        </Link>
+      </div>
     </div>
   );
 }
