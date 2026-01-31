@@ -9,6 +9,7 @@ export const creditBureauProject: Project = {
   shortCode: "CBP",
   description:
     "A comprehensive web application for managing and analyzing credit bureau reports. Enables credit underwriters, analysts, and operations teams to efficiently process and evaluate credit information.",
+  projectType: "web",
   techStack: [
     "Next.js",
     "TypeScript",

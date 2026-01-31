@@ -9,6 +9,7 @@ export const wealthManagementProject: Project = {
   shortCode: "WMA",
   description:
     "A comprehensive wealth management application for Rosabon. Enables investors to manage their portfolios, track investments, and interact with financial advisors.",
+  projectType: "mobile",
   techStack: ["React Native", "Node.js", "PostgreSQL", "Redis", "AWS"],
   targetUsers: [
     "Individual Investors",
