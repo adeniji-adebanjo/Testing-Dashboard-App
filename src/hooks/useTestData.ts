@@ -16,8 +16,20 @@ import {
   saveSignOffs,
   loadProjectTabs,
   saveProjectTabs,
+  loadFunctionalModules,
+  saveFunctionalModules,
+  loadFunctionalModuleTemplates,
+  saveFunctionalModuleTemplates,
+  loadNonFunctionalModules,
+  saveNonFunctionalModules,
+  loadNonFunctionalModuleTemplates,
+  saveNonFunctionalModuleTemplates,
 } from "@/lib/cloudStorage";
 import { ProjectTab } from "@/types/project";
+import {
+  FunctionalModule,
+  FunctionalModuleTemplate,
+} from "@/types/functional-module";
 import {
   TestCase,
   Defect,
@@ -165,6 +177,98 @@ export function useUpdateProjectTabs(projectId: string) {
     mutationFn: (tabs: ProjectTab[]) => saveProjectTabs(tabs, projectId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projectTabs", projectId] });
+    },
+  });
+}
+
+// --- Functional Modules ---
+
+export function useFunctionalModules(projectId: string) {
+  return useQuery({
+    queryKey: ["functionalModules", projectId],
+    queryFn: () => loadFunctionalModules(projectId),
+    enabled: !!projectId,
+  });
+}
+
+export function useUpdateFunctionalModules(projectId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (modules: FunctionalModule[]) =>
+      saveFunctionalModules(modules, projectId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["functionalModules", projectId],
+      });
+    },
+  });
+}
+
+// --- Functional Module Templates ---
+
+export function useFunctionalModuleTemplates(projectId: string) {
+  return useQuery({
+    queryKey: ["functionalModuleTemplates", projectId],
+    queryFn: () => loadFunctionalModuleTemplates(projectId),
+    enabled: !!projectId,
+  });
+}
+
+export function useUpdateFunctionalModuleTemplates(projectId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (templates: FunctionalModuleTemplate[]) =>
+      saveFunctionalModuleTemplates(templates, projectId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["functionalModuleTemplates", projectId],
+      });
+    },
+  });
+}
+
+// --- Non-Functional Modules ---
+
+export function useNonFunctionalModules(projectId: string) {
+  return useQuery({
+    queryKey: ["nonFunctionalModules", projectId],
+    queryFn: () => loadNonFunctionalModules(projectId),
+    enabled: !!projectId,
+  });
+}
+
+export function useUpdateNonFunctionalModules(projectId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (modules: FunctionalModule[]) =>
+      saveNonFunctionalModules(modules, projectId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["nonFunctionalModules", projectId],
+      });
+    },
+  });
+}
+
+// --- Non-Functional Module Templates ---
+
+export function useNonFunctionalModuleTemplates(projectId: string) {
+  return useQuery({
+    queryKey: ["nonFunctionalModuleTemplates", projectId],
+    queryFn: () => loadNonFunctionalModuleTemplates(projectId),
+    enabled: !!projectId,
+  });
+}
+
+export function useUpdateNonFunctionalModuleTemplates(projectId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (templates: FunctionalModuleTemplate[]) =>
+      saveNonFunctionalModuleTemplates(templates, projectId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["nonFunctionalModuleTemplates", projectId],
+      });
     },
   });
 }

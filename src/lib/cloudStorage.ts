@@ -7,6 +7,10 @@ import {
   SignOff,
 } from "@/types/test-case";
 import { ProjectTab } from "@/types/project";
+import {
+  FunctionalModule,
+  FunctionalModuleTemplate,
+} from "@/types/functional-module";
 import { supabase, getSessionId, isSupabaseEnabled } from "./supabase";
 import {
   setSyncing,
@@ -30,6 +34,11 @@ const STORAGE_KEYS = {
   ENVIRONMENTS: "credit_bureau_environments",
   SIGN_OFFS: "credit_bureau_sign_offs",
   PROJECT_TABS: "credit_bureau_project_tabs",
+  FUNCTIONAL_MODULES: "credit_bureau_functional_modules",
+  FUNCTIONAL_MODULE_TEMPLATES: "credit_bureau_functional_module_templates",
+  NON_FUNCTIONAL_MODULES: "credit_bureau_non_functional_modules",
+  NON_FUNCTIONAL_MODULE_TEMPLATES:
+    "credit_bureau_non_functional_module_templates",
   LAST_UPDATED: "credit_bureau_last_updated",
 };
 
@@ -458,6 +467,86 @@ export const loadProjectTabs = async (
   projectId?: string,
 ): Promise<ProjectTab[]> => {
   return loadFromCloud<ProjectTab[]>(STORAGE_KEYS.PROJECT_TABS, [], projectId);
+};
+
+// --- Functional Modules ---
+export const saveFunctionalModules = async (
+  modules: FunctionalModule[],
+  projectId?: string,
+): Promise<boolean> => {
+  return saveToCloud(STORAGE_KEYS.FUNCTIONAL_MODULES, modules, projectId);
+};
+
+export const loadFunctionalModules = async (
+  projectId?: string,
+): Promise<FunctionalModule[]> => {
+  return loadFromCloud<FunctionalModule[]>(
+    STORAGE_KEYS.FUNCTIONAL_MODULES,
+    [],
+    projectId,
+  );
+};
+
+// --- Functional Module Templates ---
+export const saveFunctionalModuleTemplates = async (
+  templates: FunctionalModuleTemplate[],
+  projectId?: string,
+): Promise<boolean> => {
+  return saveToCloud(
+    STORAGE_KEYS.FUNCTIONAL_MODULE_TEMPLATES,
+    templates,
+    projectId,
+  );
+};
+
+export const loadFunctionalModuleTemplates = async (
+  projectId?: string,
+): Promise<FunctionalModuleTemplate[]> => {
+  return loadFromCloud<FunctionalModuleTemplate[]>(
+    STORAGE_KEYS.FUNCTIONAL_MODULE_TEMPLATES,
+    [],
+    projectId,
+  );
+};
+
+// --- Non-Functional Modules ---
+export const saveNonFunctionalModules = async (
+  modules: FunctionalModule[],
+  projectId?: string,
+): Promise<boolean> => {
+  return saveToCloud(STORAGE_KEYS.NON_FUNCTIONAL_MODULES, modules, projectId);
+};
+
+export const loadNonFunctionalModules = async (
+  projectId?: string,
+): Promise<FunctionalModule[]> => {
+  return loadFromCloud<FunctionalModule[]>(
+    STORAGE_KEYS.NON_FUNCTIONAL_MODULES,
+    [],
+    projectId,
+  );
+};
+
+// --- Non-Functional Module Templates ---
+export const saveNonFunctionalModuleTemplates = async (
+  templates: FunctionalModuleTemplate[],
+  projectId?: string,
+): Promise<boolean> => {
+  return saveToCloud(
+    STORAGE_KEYS.NON_FUNCTIONAL_MODULE_TEMPLATES,
+    templates,
+    projectId,
+  );
+};
+
+export const loadNonFunctionalModuleTemplates = async (
+  projectId?: string,
+): Promise<FunctionalModuleTemplate[]> => {
+  return loadFromCloud<FunctionalModuleTemplate[]>(
+    STORAGE_KEYS.NON_FUNCTIONAL_MODULE_TEMPLATES,
+    [],
+    projectId,
+  );
 };
 
 export const getLastUpdated = (): string | null => {

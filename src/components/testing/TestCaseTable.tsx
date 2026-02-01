@@ -7,16 +7,26 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { getStatusColor, cn } from "@/lib/utils";
-import { Edit, CheckCircle2, XCircle, Clock } from "lucide-react";
+import {
+  Edit,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Trash2,
+  Save,
+  X,
+} from "lucide-react";
 
 interface TestCaseTableProps {
   testCases: TestCase[];
   onUpdate: (testCases: TestCase[]) => void;
+  onDelete?: (testCaseId: string) => void;
 }
 
 export default function TestCaseTable({
   testCases,
   onUpdate,
+  onDelete,
 }: TestCaseTableProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<TestCase>>({});
@@ -49,6 +59,25 @@ export default function TestCaseTable({
     onUpdate(updated);
   };
 
+  const handleDelete = (testCaseId: string) => {
+    if (onDelete) {
+      onDelete(testCaseId);
+    } else {
+      // Fallback: remove from the list and call onUpdate
+      const updated = testCases.filter((tc) => tc.id !== testCaseId);
+      onUpdate(updated);
+    }
+  };
+
+  if (testCases.length === 0) {
+    return (
+      <div className="text-center py-12 text-gray-400 border-2 border-dashed rounded-lg">
+        <p className="text-sm">No test cases in this module.</p>
+        <p className="text-xs mt-1">Add test cases to begin testing.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full">
       {/* Mobile Card View */}
@@ -59,26 +88,58 @@ export default function TestCaseTable({
             className="border border-gray-100 shadow-sm overflow-hidden"
           >
             <CardHeader className="bg-gray-50/50 py-2.5 px-4 flex flex-row items-center justify-between space-y-0">
-              <span className="text-[10px] font-black text-gray-500 tracking-widest uppercase">
-                {testCase.testCaseId}
-              </span>
-              <Badge
-                className={cn(
-                  getStatusColor(testCase.status),
-                  "text-[9px] px-2 py-0.5 font-black uppercase tracking-wider border-none",
+              {editingId === testCase.id ? (
+                <input
+                  type="text"
+                  value={editData.testCaseId || ""}
+                  onChange={(e) =>
+                    setEditData({ ...editData, testCaseId: e.target.value })
+                  }
+                  className="text-[10px] font-black text-gray-500 tracking-widest uppercase bg-white border rounded px-2 py-1 w-28"
+                />
+              ) : (
+                <span className="text-[10px] font-black text-gray-500 tracking-widest uppercase">
+                  {testCase.testCaseId}
+                </span>
+              )}
+              <div className="flex items-center gap-2">
+                <Badge
+                  className={cn(
+                    getStatusColor(testCase.status),
+                    "text-[9px] px-2 py-0.5 font-black uppercase tracking-wider border-none",
+                  )}
+                >
+                  {testCase.status}
+                </Badge>
+                {editingId !== testCase.id && (
+                  <button
+                    onClick={() => handleDelete(testCase.id)}
+                    className="p-1 hover:bg-red-100 rounded"
+                  >
+                    <Trash2 className="h-3 w-3 text-red-400" />
+                  </button>
                 )}
-              >
-                {testCase.status}
-              </Badge>
+              </div>
             </CardHeader>
             <CardContent className="p-4 space-y-4">
               <div>
                 <Label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1.5 block">
                   Scenario
                 </Label>
-                <p className="text-[13px] font-bold text-gray-900 leading-snug mt-1">
-                  {testCase.scenario}
-                </p>
+                {editingId === testCase.id ? (
+                  <input
+                    type="text"
+                    value={editData.scenario || ""}
+                    onChange={(e) =>
+                      setEditData({ ...editData, scenario: e.target.value })
+                    }
+                    className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-[13px] font-bold focus:ring-1 focus:ring-primary outline-none"
+                  />
+                ) : (
+                  <p className="text-[13px] font-bold text-gray-900 leading-snug mt-1">
+                    {testCase.scenario}
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -86,9 +147,23 @@ export default function TestCaseTable({
                   <Label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1.5 block">
                     Expected
                   </Label>
-                  <p className="text-[11px] text-gray-600 leading-relaxed">
-                    {testCase.expectedResult}
-                  </p>
+                  {editingId === testCase.id ? (
+                    <input
+                      type="text"
+                      value={editData.expectedResult || ""}
+                      onChange={(e) =>
+                        setEditData({
+                          ...editData,
+                          expectedResult: e.target.value,
+                        })
+                      }
+                      className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-[11px] focus:ring-1 focus:ring-primary outline-none"
+                    />
+                  ) : (
+                    <p className="text-[11px] text-gray-600 leading-relaxed">
+                      {testCase.expectedResult}
+                    </p>
+                  )}
                 </div>
                 <div className="bg-gray-50/50 p-2.5 rounded-lg border border-gray-100">
                   <Label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1.5 block">
@@ -240,14 +315,61 @@ export default function TestCaseTable({
                 key={testCase.id}
                 className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors"
               >
-                <td className="p-3 text-xs font-black text-gray-400 uppercase tracking-wider">
-                  {testCase.testCaseId}
+                <td className="p-3">
+                  {editingId === testCase.id ? (
+                    <input
+                      type="text"
+                      value={editData.testCaseId || ""}
+                      onChange={(e) =>
+                        setEditData({
+                          ...editData,
+                          testCaseId: e.target.value,
+                        })
+                      }
+                      className="w-28 rounded border border-gray-300 px-2 py-1 text-xs font-mono"
+                    />
+                  ) : (
+                    <span className="text-xs font-black text-gray-400 uppercase tracking-wider">
+                      {testCase.testCaseId}
+                    </span>
+                  )}
                 </td>
-                <td className="p-3 text-sm font-semibold text-gray-900">
-                  {testCase.scenario}
+                <td className="p-3">
+                  {editingId === testCase.id ? (
+                    <input
+                      type="text"
+                      value={editData.scenario || ""}
+                      onChange={(e) =>
+                        setEditData({ ...editData, scenario: e.target.value })
+                      }
+                      className="w-full rounded border border-gray-300 px-2 py-1 text-sm"
+                      placeholder="Test scenario..."
+                    />
+                  ) : (
+                    <span className="text-sm font-semibold text-gray-900">
+                      {testCase.scenario}
+                    </span>
+                  )}
                 </td>
-                <td className="p-3 text-xs text-gray-600 max-w-[200px]">
-                  {testCase.expectedResult}
+                <td className="p-3">
+                  {editingId === testCase.id ? (
+                    <input
+                      type="text"
+                      value={editData.expectedResult || ""}
+                      onChange={(e) =>
+                        setEditData({
+                          ...editData,
+                          expectedResult: e.target.value,
+                        })
+                      }
+                      className="w-full rounded border border-gray-300 px-2 py-1 text-xs"
+                      placeholder="Expected result..."
+                    />
+                  ) : (
+                    <span className="text-xs text-gray-600 max-w-[200px]">
+                      {testCase.expectedResult}
+                    </span>
+                  )}
                 </td>
                 <td className="p-3 text-sm">
                   {editingId === testCase.id ? (
@@ -321,23 +443,38 @@ export default function TestCaseTable({
                 </td>
                 <td className="p-3">
                   {editingId === testCase.id ? (
-                    <div className="flex gap-2">
-                      <Button size="sm" onClick={saveEdit}>
-                        Save
+                    <div className="flex gap-1">
+                      <Button size="sm" onClick={saveEdit} className="h-7 px-2">
+                        <Save className="h-3.5 w-3.5" />
                       </Button>
-                      <Button size="sm" variant="outline" onClick={cancelEdit}>
-                        Cancel
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={cancelEdit}
+                        className="h-7 px-2"
+                      >
+                        <X className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   ) : (
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => startEdit(testCase)}
-                      className="h-8 w-8 text-gray-400 hover:text-primary"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
+                    <div className="flex gap-1">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => startEdit(testCase)}
+                        className="h-8 w-8 text-gray-400 hover:text-primary"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => handleDelete(testCase.id)}
+                        className="h-8 w-8 text-gray-400 hover:text-red-500"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   )}
                 </td>
               </tr>
