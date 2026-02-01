@@ -183,17 +183,30 @@ export default function NonFunctionalTestingPage() {
     return testCases.filter((tc) => tc.module === moduleName);
   };
 
-  const handleUpdate = (updatedInModule: TestCase[]) => {
-    // Combine with existing test cases from other modules
-    const otherTestCases = (allTestCases || []).filter(
-      (tc) => !activeModules.some((m) => m.name === tc.module),
-    );
-    const currentModuleTestCases = testCases.map((tc) => {
-      const match = updatedInModule.find((utc) => utc.id === tc.id);
-      return match || tc;
-    });
-    updateMutation.mutate([...otherTestCases, ...currentModuleTestCases]);
-  };
+  const handleUpdate = useCallback(
+    (updatedInModule: TestCase[]) => {
+      // Combine with existing test cases from other modules
+      const otherTestCases = (allTestCases || []).filter(
+        (tc) => !activeModules.some((m) => m.name === tc.module),
+      );
+      const currentModuleTestCases = testCases.map((tc) => {
+        const match = updatedInModule.find((utc) => utc.id === tc.id);
+        return match || tc;
+      });
+      updateMutation.mutate([...otherTestCases, ...currentModuleTestCases]);
+    },
+    [allTestCases, activeModules, testCases, updateMutation],
+  );
+
+  // Delete a test case
+  const handleDeleteTestCase = useCallback(
+    (testCaseId: string) => {
+      if (!allTestCases) return;
+      const updatedAll = allTestCases.filter((tc) => tc.id !== testCaseId);
+      updateMutation.mutate(updatedAll);
+    },
+    [allTestCases, updateMutation],
+  );
 
   // Add a new test case to a module
   const handleAddTestCase = useCallback(
