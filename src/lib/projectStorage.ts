@@ -677,24 +677,14 @@ export const deleteProject = async (projectId: string): Promise<boolean> => {
 export const getProjectStats = async (
   projectId: string,
 ): Promise<ProjectStats> => {
-  // Import here to avoid circular dependency
-  const { loadFromStorage } = await import("./storage");
+  // Import from cloudStorage to ensure we get the latest synced data
+  const { loadTestCases, loadDefects } = await import("./cloudStorage");
 
-  // Load test cases for this project
-  const allTestCases = loadFromStorage<
-    Array<{ projectId?: string; status: string }>
-  >("credit_bureau_test_cases", []);
-  const projectTestCases = allTestCases.filter(
-    (tc) => tc.projectId === projectId || !tc.projectId,
-  );
+  // Load test cases for this project from cloud storage
+  const projectTestCases = await loadTestCases(projectId);
 
-  // Load defects for this project
-  const allDefects = loadFromStorage<
-    Array<{ projectId?: string; status: string }>
-  >("credit_bureau_defects", []);
-  const projectDefects = allDefects.filter(
-    (d) => d.projectId === projectId || !d.projectId,
-  );
+  // Load defects for this project from cloud storage
+  const projectDefects = await loadDefects(projectId);
 
   const passed = projectTestCases.filter((tc) => tc.status === "pass").length;
   const failed = projectTestCases.filter((tc) => tc.status === "fail").length;
