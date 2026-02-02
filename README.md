@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Credit Bureau Testing Dashboard
 
-## Getting Started
+A high-performance, aesthetically rich dashboard for managing software testing lifecycles, specializing in credit bureau applications. This dashboard provides a modular approach to both functional and non-functional testing, with seamless cloud synchronization via Supabase.
 
-First, run the development server:
+## ✨ Features
+
+- **Multi-Project Management**: Effortlessly toggle between different projects, each with its own isolated data, settings, and custom testing tabs.
+- **Dynamic Testing Modules**:
+  - **Functional Testing**: Customizable modules (e.g., Authentication, Search, API) with editable default scenarios.
+  - **Non-Functional Testing**: Specialized modules for Performance, Security, Usability, and Compatibility metrics.
+- **Template System**: Define project-wide templates for test cases, including custom ID prefixes (e.g., AUTH-001) and default scenarios.
+- **AI-Powered Generation**: (Ready for integration) Capabilities to auto-generate test cases from PRD uploads.
+- **Rich Data Visualizations**: Real-time metrics tracking for test progress and defect density.
+- **Export Capabilities**: Generate professional PDF reports and Excel spreadsheets of test results.
+- **Responsive & Premium UI**: Built with a "Visual Excellence" philosophy using Tailwind CSS, Radix UI, and Lucide Icons.
+
+## 🚀 Tech Stack
+
+- **Framework**: [Next.js 15+](https://nextjs.org/) (App Router)
+- **Database & Auth**: [Supabase](https://supabase.com/)
+- **State Management**: [TanStack Query v5](https://tanstack.com/query/latest)
+- **Styling**: Tailwind CSS
+- **UI Components**: Shadcn UI & Radix UI
+- **Icons**: Lucide React
+- **Logging/Analytics**: Custom internal telemetry
+
+## 📁 Project Structure
+
+```text
+src/
+├── app/                  # Next.js App Router (Dashboard, Login, API)
+│   ├── (dashboard)/      # Protected dashboard routes
+│   │   └── projects/     # Project-specific testing pages
+├── components/           # Reusable UI components
+│   ├── testing/          # Test case tables, managers, and modules
+│   ├── layout/           # Sidebar, Navbar, and Shell
+│   └── ui/               # Primary UI primitives (buttons, cards, etc.)
+├── hooks/                # Custom React hooks (Data fetching, Auth)
+├── lib/                  # Utility functions and Cloud Storage logic
+├── types/                # TypeScript interfaces and global definitions
+└── context/              # React Context providers
+```
+
+## 🛠️ Getting Started
+
+### 1. Prerequisite
+
+Ensure you have Node.js (v18+) and an active Supabase project.
+
+### 2. Installation
+
+```bash
+git clone https://github.com/adeniji-adebanjo/App-Testing-Dashboard.git
+cd App-Testing-Dashboard
+npm install
+```
+
+### 3. Environment Setup
+
+Create a `.env.local` file in the root:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+### 4. Database Schema
+
+Apply the latest SQL migration (found in the "Project Settings" or provided separately) to your Supabase SQL editor to set up the following:
+
+- `projects` & `project_tabs`
+- `functional_modules` & `functional_module_templates`
+- `default_test_scenarios`
+- `test_data` & `defects`
+
+### 5. Run Locally
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ⚙️ Configuration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+You can customize the testing matrix via the **"Configure Modules"** button on the Functional and Non-Functional testing pages. This allows you to:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Rename or reorder tabs.
+- Change Test Case ID prefixes.
+- Pre-populate projects with standard scenarios (e.g., "Verify SSL compliance" for Security).
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Developed with ❤️ for quality assurance excellence.
