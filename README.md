@@ -1,4 +1,4 @@
-# Credit Bureau Testing Dashboard
+# App Testing Dashboard
 
 A high-performance, aesthetically rich dashboard for managing software testing lifecycles, specializing in credit bureau applications. This dashboard provides a modular approach to both functional and non-functional testing, with seamless cloud synchronization via Supabase.
 
