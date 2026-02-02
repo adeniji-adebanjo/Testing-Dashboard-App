@@ -10,6 +10,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   CheckCircle2,
@@ -20,6 +21,7 @@ import {
   Target,
   Monitor,
   Smartphone,
+  FileText,
 } from "lucide-react";
 import { loadProjects, getProjectStats } from "@/lib/projectStorage";
 import { Project, ProjectStats } from "@/types/project";
@@ -249,13 +251,27 @@ export default function PublicProjectSummaryPage() {
         </CardContent>
       </Card>
 
+      {/* Detailed Analysis Button */}
+      <div className="flex justify-center px-2 sm:px-0">
+        <Button
+          asChild
+          size="lg"
+          className="w-full sm:w-auto gap-3 py-6 shadow-lg shadow-primary/20 hover:shadow-xl transition-all font-black uppercase tracking-wider"
+        >
+          <Link href={`/public/projects/${id}/analysis`}>
+            <FileText size={18} />
+            View Detailed Analysis
+          </Link>
+        </Button>
+      </div>
+
       {/* Footer */}
       <div className="text-center pt-12 border-t border-gray-100 pb-12 mb-8 mx-2 sm:mx-0">
         <p className="text-[10px] sm:text-xs text-gray-400 mb-5 font-bold uppercase tracking-widest">
           Public QA Record • {new Date().toLocaleDateString()}
         </p>
         <Link
-          href="/"
+          href="/public"
           className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-gray-200 text-xs font-black uppercase tracking-widest text-gray-600 hover:bg-gray-50 transition-all"
         >
           <Target size={14} />
