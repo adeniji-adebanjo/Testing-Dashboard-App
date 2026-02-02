@@ -463,9 +463,9 @@ export default function PublicProjectAnalysisPage() {
   // Group test cases by module
   const testCasesByModule = testCases.reduce(
     (acc, tc) => {
-      const module = tc.module || "Uncategorized";
-      if (!acc[module]) acc[module] = [];
-      acc[module].push(tc);
+      const moduleName = tc.module || "Uncategorized";
+      if (!acc[moduleName]) acc[moduleName] = [];
+      acc[moduleName].push(tc);
       return acc;
     },
     {} as Record<string, TestCase[]>,
@@ -636,11 +636,11 @@ export default function PublicProjectAnalysisPage() {
         >
           {Object.keys(testCasesByModule).length > 0 ? (
             <div className="divide-y divide-gray-100">
-              {Object.entries(testCasesByModule).map(([module, cases]) => (
-                <div key={module} className="p-4 sm:p-6">
+              {Object.entries(testCasesByModule).map(([moduleName, cases]) => (
+                <div key={moduleName} className="p-4 sm:p-6">
                   <div className="flex items-center gap-2 mb-4">
                     <Badge variant="secondary" className="font-bold">
-                      {module}
+                      {moduleName}
                     </Badge>
                     <span className="text-xs text-gray-400">
                       {cases.length} test case{cases.length !== 1 ? "s" : ""}
