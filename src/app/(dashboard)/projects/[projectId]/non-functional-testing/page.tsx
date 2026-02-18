@@ -339,22 +339,19 @@ export default function NonFunctionalTestingPage() {
             defaultValue={activeModules[0]?.slug || "performance"}
             className="w-full"
           >
-            <TabsList
-              className="grid w-full bg-gray-100/50 p-1 h-auto gap-1"
-              style={{
-                gridTemplateColumns: `repeat(${Math.min(activeModules.length, 4)}, minmax(0, 1fr))`,
-              }}
-            >
-              {activeModules.map((module) => (
-                <TabsTrigger
-                  key={module.id}
-                  value={module.slug}
-                  className="py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm"
-                >
-                  {module.name}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <div className="overflow-x-auto pb-1 scrollbar-hide">
+              <TabsList className="inline-flex w-auto md:w-full bg-gray-100/50 p-1 h-auto gap-1 whitespace-nowrap">
+                {activeModules.map((module) => (
+                  <TabsTrigger
+                    key={module.id}
+                    value={module.slug}
+                    className="flex-1 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm"
+                  >
+                    {module.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
 
             {activeModules.map((module) => (
               <TabsContent key={module.id} value={module.slug} className="mt-6">

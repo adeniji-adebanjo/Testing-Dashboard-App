@@ -33,7 +33,7 @@ export default function PublicProjectLayout({
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-gray-50">
       {/* Mobile Sidebar Backdrop */}
       {sidebarOpen && (
         <div
@@ -45,11 +45,11 @@ export default function PublicProjectLayout({
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 sm:w-72 flex flex-col bg-white border-r border-gray-100 shadow-sm transition-transform duration-300 md:relative md:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 w-64 sm:w-72 flex flex-col bg-white border-r border-gray-100 shadow-sm transition-transform duration-300 md:relative md:translate-x-0 h-full",
           sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         )}
       >
-        <div className="p-5 sm:p-6 border-b border-gray-50 flex items-center justify-between">
+        <div className="p-5 sm:p-6 border-b border-gray-50 flex items-center justify-between shrink-0">
           <Link href="/" className="flex items-center gap-2 group">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
               <Globe size={18} />
@@ -118,7 +118,7 @@ export default function PublicProjectLayout({
           </div>
         </nav>
 
-        <div className="p-5 sm:p-6 bg-gray-50/50 border-t border-gray-100">
+        <div className="p-5 sm:p-6 bg-gray-50/50 border-t border-gray-100 shrink-0">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center shrink-0">
               <BarChart3 className="w-4 h-4 text-green-600" />
@@ -142,9 +142,9 @@ export default function PublicProjectLayout({
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 min-w-0 bg-linear-to-br from-gray-50 to-gray-100 flex flex-col">
+      <main className="flex-1 min-w-0 bg-linear-to-br from-gray-50 to-gray-100 flex flex-col h-full overflow-hidden">
         {/* Mobile Header */}
-        <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100 sticky top-0 z-30 shadow-sm">
+        <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100 shrink-0 z-30 shadow-sm">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white shadow-lg shadow-primary/20">
               <Globe size={18} />
@@ -157,7 +157,7 @@ export default function PublicProjectLayout({
             <Menu size={20} />
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto">{children}</div>
+        <div className="flex-1 overflow-y-auto scroll-smooth">{children}</div>
       </main>
     </div>
   );
