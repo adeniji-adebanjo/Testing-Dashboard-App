@@ -285,31 +285,35 @@ export default function NonFunctionalTestingPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
             Non-Functional Testing
           </h1>
-          <p className="mt-2 text-gray-500">
+          <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-500">
             Assess performance, security, and usability benchmarks
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={handleSyncWithDefaults}
-            className="gap-2 text-gray-600 border-gray-200"
+            className="flex-1 sm:flex-none gap-2 text-gray-600 border-gray-200"
             title="Add missing default scenarios from templates"
           >
             <RefreshCw className="h-4 w-4" />
-            Sync Defaults
+            <span className="sm:inline">Sync Defaults</span>
           </Button>
           <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 sm:flex-none gap-2"
+              >
                 <Settings2 className="h-4 w-4" />
-                Configure Modules
+                <span className="sm:inline">Configure Modules</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
