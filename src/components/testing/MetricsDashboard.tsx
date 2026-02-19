@@ -90,7 +90,7 @@ export default function MetricsDashboard() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       {/* Quick Stats Grid */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <CardStat
           label="Total Metrics"
           value={metStats.total}
@@ -116,107 +116,189 @@ export default function MetricsDashboard() {
         />
       </div>
 
-      {/* Metrics Detail Table */}
       <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white/70 backdrop-blur-md shadow-sm">
-        <table className="w-full text-left">
-          <thead className="bg-gray-50/50 border-b border-gray-100">
-            <tr>
-              <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">
-                Success Metric
-              </th>
-              <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">
-                Target
-              </th>
-              <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">
-                Actual Value
-              </th>
-              <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">
-                Approval
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
-            {metrics.map((metric) => (
-              <tr
-                key={metric.id}
-                className="group hover:bg-gray-50/30 transition-colors"
-              >
-                <td className="p-4">
-                  <span className="text-sm font-bold text-gray-900">
-                    {metric.metric}
-                  </span>
-                </td>
-                <td className="p-4">
-                  <Badge
-                    variant="outline"
-                    className="font-mono text-xs border-gray-100 bg-gray-50/50"
-                  >
-                    {metric.target}
-                  </Badge>
-                </td>
-                <td className="p-4">
-                  {editingId === metric.id ? (
-                    <div className="flex items-center gap-2">
-                      <Input
-                        value={metric.actualResult}
-                        onChange={(e) =>
-                          updateMetric(
-                            metric.id,
-                            "actualResult",
-                            e.target.value,
-                          )
-                        }
-                        onBlur={() => setEditingId(null)}
-                        onKeyDown={(e) =>
-                          e.key === "Enter" && setEditingId(null)
-                        }
-                        autoFocus
-                        className="h-8 text-sm focus-visible:ring-primary"
-                      />
-                    </div>
-                  ) : (
-                    <div
-                      onClick={() => setEditingId(metric.id)}
-                      className="group/val flex items-center justify-between cursor-text text-sm font-medium text-gray-600 bg-gray-50/30 hover:bg-gray-100/50 px-3 py-1.5 rounded-lg border border-transparent hover:border-gray-200 transition-all"
-                    >
-                      <span>{metric.actualResult || "Log Result..."}</span>
-                      <Edit2
-                        size={12}
-                        className="text-gray-300 opacity-0 group-hover/val:opacity-100 transition-opacity"
-                      />
-                    </div>
-                  )}
-                </td>
-                <td className="p-4">
-                  <Select
-                    value={metric.status}
-                    onValueChange={(value: SuccessMetric["status"]) =>
-                      updateMetric(metric.id, "status", value)
-                    }
-                  >
-                    <SelectTrigger
-                      className={cn(
-                        "h-8 w-32 border-none shadow-none text-xs font-bold uppercase tracking-tight",
-                        metric.status === "met"
-                          ? "bg-green-100 text-green-700"
-                          : metric.status === "not-met"
-                            ? "bg-red-50 text-red-600"
-                            : "bg-gray-100 text-gray-500",
-                      )}
-                    >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="met">Met</SelectItem>
-                      <SelectItem value="not-met">Not Met</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </td>
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-gray-50/50 border-b border-gray-100">
+              <tr>
+                <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                  Success Metric
+                </th>
+                <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                  Target
+                </th>
+                <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                  Actual Value
+                </th>
+                <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                  Approval
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {metrics.map((metric) => (
+                <tr
+                  key={metric.id}
+                  className="group hover:bg-gray-50/30 transition-colors"
+                >
+                  <td className="p-4">
+                    <span className="text-sm font-bold text-gray-900">
+                      {metric.metric}
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    <Badge
+                      variant="outline"
+                      className="font-mono text-xs border-gray-100 bg-gray-50/50"
+                    >
+                      {metric.target}
+                    </Badge>
+                  </td>
+                  <td className="p-4">
+                    {editingId === metric.id ? (
+                      <div className="flex items-center gap-2">
+                        <Input
+                          value={metric.actualResult}
+                          onChange={(e) =>
+                            updateMetric(
+                              metric.id,
+                              "actualResult",
+                              e.target.value,
+                            )
+                          }
+                          onBlur={() => setEditingId(null)}
+                          onKeyDown={(e) =>
+                            e.key === "Enter" && setEditingId(null)
+                          }
+                          autoFocus
+                          className="h-8 text-sm focus-visible:ring-primary"
+                        />
+                      </div>
+                    ) : (
+                      <div
+                        onClick={() => setEditingId(metric.id)}
+                        className="group/val flex items-center justify-between cursor-text text-sm font-medium text-gray-600 bg-gray-50/30 hover:bg-gray-100/50 px-3 py-1.5 rounded-lg border border-transparent hover:border-gray-200 transition-all"
+                      >
+                        <span>{metric.actualResult || "Log Result..."}</span>
+                        <Edit2
+                          size={12}
+                          className="text-gray-300 opacity-0 group-hover/val:opacity-100 transition-opacity"
+                        />
+                      </div>
+                    )}
+                  </td>
+                  <td className="p-4">
+                    <Select
+                      value={metric.status}
+                      onValueChange={(value: SuccessMetric["status"]) =>
+                        updateMetric(metric.id, "status", value)
+                      }
+                    >
+                      <SelectTrigger
+                        className={cn(
+                          "h-8 w-32 border-none shadow-none text-xs font-bold uppercase tracking-tight",
+                          metric.status === "met"
+                            ? "bg-green-100 text-green-700"
+                            : metric.status === "not-met"
+                              ? "bg-red-50 text-red-600"
+                              : "bg-gray-100 text-gray-500",
+                        )}
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="met">Met</SelectItem>
+                        <SelectItem value="not-met">Not Met</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile List View */}
+        <div className="md:hidden divide-y divide-gray-100">
+          {metrics.map((metric) => (
+            <div key={metric.id} className="p-4 space-y-4">
+              <div className="flex justify-between items-start">
+                <div className="space-y-1">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                    Metric
+                  </p>
+                  <p className="text-sm font-bold text-gray-900">
+                    {metric.metric}
+                  </p>
+                </div>
+                <Badge
+                  variant="outline"
+                  className="font-mono text-[10px] border-gray-100 bg-gray-50/50"
+                >
+                  {metric.target}
+                </Badge>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                  Actual Value
+                </p>
+                {editingId === metric.id ? (
+                  <Input
+                    value={metric.actualResult}
+                    onChange={(e) =>
+                      updateMetric(metric.id, "actualResult", e.target.value)
+                    }
+                    onBlur={() => setEditingId(null)}
+                    onKeyDown={(e) => e.key === "Enter" && setEditingId(null)}
+                    autoFocus
+                    className="h-9 text-sm focus-visible:ring-primary"
+                  />
+                ) : (
+                  <div
+                    onClick={() => setEditingId(metric.id)}
+                    className="flex items-center justify-between cursor-text text-sm font-medium text-gray-600 bg-gray-50/30 px-3 py-2 rounded-lg border border-gray-100 transition-all"
+                  >
+                    <span>{metric.actualResult || "Log Result..."}</span>
+                    <Edit2 size={12} className="text-gray-300" />
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                  Approval Status
+                </p>
+                <Select
+                  value={metric.status}
+                  onValueChange={(value: SuccessMetric["status"]) =>
+                    updateMetric(metric.id, "status", value)
+                  }
+                >
+                  <SelectTrigger
+                    className={cn(
+                      "h-9 w-full border border-gray-100 shadow-none text-xs font-bold uppercase tracking-tight",
+                      metric.status === "met"
+                        ? "bg-green-100 text-green-700 border-green-200"
+                        : metric.status === "not-met"
+                          ? "bg-red-50 text-red-600 border-red-100"
+                          : "bg-gray-100 text-gray-500",
+                    )}
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="met">Met</SelectItem>
+                    <SelectItem value="not-met">Not Met</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Visual Roadmap Card */}
